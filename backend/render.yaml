@@ -1,0 +1,4 @@
+services:
+  - type: web
+    buildCommand: npm install && npm run build
+    publishDir: build # หรือ dist ขึ้นอยู่กับ framework ที่ใช้
