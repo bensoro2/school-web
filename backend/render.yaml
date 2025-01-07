@@ -1,10 +1,8 @@
 services:
   - type: web
-    buildCommand: >
-      npm install &&
-      npx prisma generate &&
-      npx prisma db push --accept-data-loss --force-reset
+    buildCommand: npm install && npx prisma generate && npx prisma db push --accept-data-loss --force-reset
     startCommand: npm start
+    rootDir: backend
     envVars:
       - key: NODE_ENV
         value: production
@@ -31,5 +29,3 @@ services:
         - app.js
         - prisma/**
         - src/**
-    rootDir: .
-    workingDirectory: .
