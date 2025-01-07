@@ -1,11 +1,11 @@
 services:
   - type: web
+    rootDir: backend
     buildCommand: >
-      cd backend && 
       npm install && 
       npx prisma generate && 
-      npx prisma db push --accept-data-loss --force-reset
-    startCommand: cd backend && npm start
+      npx prisma db push
+    startCommand: npm start
     envVars:
       - key: NODE_ENV
         value: production
@@ -27,8 +27,8 @@ services:
         sync: false
     buildFilter:
       paths:
-        - backend/package.json
-        - backend/package-lock.json
-        - backend/app.js
-        - backend/prisma/**
-        - backend/src/**
+        - package.json
+        - package-lock.json
+        - app.js
+        - prisma/**
+        - src/**
