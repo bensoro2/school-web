@@ -7,9 +7,14 @@ services:
         value: production
       - key: FRONTEND_URL
         value: "https://frontend-two-black-20.vercel.app"
+      - key: DATABASE_URL
+        sync: false
+      - key: JWT_SECRET
+        sync: false
     buildFilter:
       paths:
         - package.json
         - package-lock.json
         - app.js
         - src/**
+    rootDir: .
