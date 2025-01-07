@@ -1,10 +1,10 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
 datasource db {
   provider = "mysql"
   url      = env("DATABASE_URL")
-}
-
-generator client {
-  provider = "prisma-client-js"
 }
 
 // Table 1: รายการหลัก
@@ -16,7 +16,7 @@ model Transaction {
   duration    String    // ระยะเวลา
   note        String?   // หมายเหตุ (optional)
   projectId   Int?      // โครงการที่เกี่ยวข้อง (optional)
-  project     Project?  @relation(fields: [projectId], references: [id])
+  project     Project?  @relation(fields: [projectId], references: [id], onDelete: SetNull)
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 }
@@ -34,8 +34,8 @@ model Project {
   updatedAt        DateTime @updatedAt
   subsidyId        Int
   fiscalYearId     Int
-  subsidy          Subsidy  @relation(fields: [subsidyId], references: [id])
-  fiscalYear       FiscalYear @relation(fields: [fiscalYearId], references: [id])
+  subsidy          Subsidy    @relation(fields: [subsidyId], references: [id], onDelete: Cascade)
+  fiscalYear       FiscalYear @relation(fields: [fiscalYearId], references: [id], onDelete: Cascade)
 
   Transaction Transaction[]
 }
@@ -50,7 +50,7 @@ model Subsidy {
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
   fiscalYearId    Int
-  fiscalYear      FiscalYear @relation(fields: [fiscalYearId], references: [id])
+  fiscalYear      FiscalYear @relation(fields: [fiscalYearId], references: [id], onDelete: Cascade)
   projects        Project[]
 }
 

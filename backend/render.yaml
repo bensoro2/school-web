@@ -1,14 +1,27 @@
 services:
   - type: web
-    buildCommand: npm install
+    buildCommand: >
+      npm install &&
+      npx prisma generate &&
+      npx prisma db push --accept-data-loss --force-reset
     startCommand: npm start
     envVars:
       - key: NODE_ENV
         value: production
       - key: FRONTEND_URL
         value: "https://frontend-two-black-20.vercel.app"
+      - key: MYSQL_ADDON_HOST
+        value: "bqdph9qv1qpeoyrjist1-mysql.services.clever-cloud.com"
+      - key: MYSQL_ADDON_DB
+        value: "bqdph9qv1qpeoyrjist1"
+      - key: MYSQL_ADDON_USER
+        value: "uegbtddouf6vzki1"
+      - key: MYSQL_ADDON_PORT
+        value: "3306"
+      - key: MYSQL_ADDON_PASSWORD
+        value: "ZIi4RrTmq01INU3qRknM"
       - key: DATABASE_URL
-        sync: false
+        value: "mysql://uegbtddouf6vzki1:ZIi4RrTmq01INU3qRknM@bqdph9qv1qpeoyrjist1-mysql.services.clever-cloud.com:3306/bqdph9qv1qpeoyrjist1"
       - key: JWT_SECRET
         sync: false
     buildFilter:
@@ -16,5 +29,6 @@ services:
         - package.json
         - package-lock.json
         - app.js
+        - prisma/**
         - src/**
     rootDir: .
