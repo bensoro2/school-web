@@ -41,40 +41,57 @@ class StatisticsService {
 
   async getDetailedStatistics() {
     try {
-      const counts = await this.getTableCounts();
-
-      // ดึงข้อมูลสถิติโครงการ
-      const projectStats = await this.prisma.project.aggregate({
-        _sum: {
-          budget: true,
-          withdrawalAmount: true,
-          remainingBudget: true,
-        },
-      });
-
-      // ดึงข้อมูลสถิติเงินอุดหนุน
-      const subsidyStats = await this.prisma.subsidy.aggregate({
-        _sum: {
-          budget: true,
-          withdrawal: true,
-          remainingBudget: true,
-        },
-      });
-
-      // ดึงข้อมูลปีงบประมาณทั้งหมด พร้อมข้อมูลที่เกี่ยวข้อง
-      const fiscalYears = await this.prisma.fiscalYear.findMany({
-        include: {
-          Subsidy: {
-            include: {
-              projects: true,
+      // รวม queries ทั้งหมดเป็นชุดเดียว
+      const [counts, projectStats, subsidyStats, fiscalYears] =
+        await Promise.all([
+          // ดึงจำนวนข้อมูลทั้งหมดในครั้งเดียว
+          this.prisma.$transaction([
+            this.prisma.transaction.count(),
+            this.prisma.project.count(),
+            this.prisma.subsidy.count(),
+            this.prisma.fiscalYear.count(),
+            this.prisma.user.count(),
+          ]),
+          // ดึงสถิติโครงการ
+          this.prisma.project.aggregate({
+            _sum: {
+              budget: true,
+              withdrawalAmount: true,
+              remainingBudget: true,
             },
-          },
-          Project: true,
-        },
-        orderBy: {
-          year: "desc",
-        },
-      });
+          }),
+          // ดึงสถิติเงินอุดหนุน
+          this.prisma.subsidy.aggregate({
+            _sum: {
+              budget: true,
+              withdrawal: true,
+              remainingBudget: true,
+            },
+          }),
+          // ดึงข้อมูลปีงบประมาณ
+          this.prisma.fiscalYear.findMany({
+            include: {
+              Subsidy: {
+                include: {
+                  projects: true,
+                },
+              },
+              Project: true,
+            },
+            orderBy: {
+              year: "desc",
+            },
+          }),
+        ]);
+
+      // แยกข้อมูลจำนวนรายการ
+      const [
+        transactionCount,
+        projectCount,
+        subsidyCount,
+        fiscalYearCount,
+        userCount,
+      ] = counts;
 
       // สร้างข้อมูลสถิติแยกตามปีงบประมาณ
       const fiscalYearStats = fiscalYears.map((year) => ({
@@ -91,7 +108,19 @@ class StatisticsService {
       }));
 
       return {
-        counts,
+        counts: {
+          transactions: transactionCount,
+          projects: projectCount,
+          subsidies: subsidyCount,
+          fiscalYears: fiscalYearCount,
+          users: userCount,
+          total:
+            transactionCount +
+            projectCount +
+            subsidyCount +
+            fiscalYearCount +
+            userCount,
+        },
         projectStatistics: {
           totalBudget: projectStats._sum.budget || 0,
           totalWithdrawal: projectStats._sum.withdrawalAmount || 0,
