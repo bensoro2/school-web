@@ -5,6 +5,7 @@ const authMiddleware = require("../middleware/auth");
 
 const statisticsService = new StatisticsService();
 
+// ใช้ middleware ตรวจสอบ token
 router.use(authMiddleware);
 
 // ดึงจำนวนข้อมูลในแต่ละตาราง
@@ -16,7 +17,7 @@ router.get("/counts", async (req, res) => {
       data: counts
     });
   } catch (error) {
-    res.status(400).json({
+    res.status(500).json({
       success: false,
       error: error.message
     });
@@ -32,7 +33,7 @@ router.get("/detailed", async (req, res) => {
       data: statistics
     });
   } catch (error) {
-    res.status(400).json({
+    res.status(500).json({
       success: false,
       error: error.message
     });
