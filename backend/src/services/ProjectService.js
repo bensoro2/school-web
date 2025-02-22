@@ -1,9 +1,9 @@
-const { PrismaClient } = require("@prisma/client");
+const prisma = require("../lib/prisma");
 const SubsidyService = require("./SubsidyService");
 
 class ProjectService {
   constructor() {
-    this.prisma = new PrismaClient();
+    this.prisma = prisma;
     this.subsidyService = new SubsidyService();
   }
 
@@ -23,17 +23,24 @@ class ProjectService {
       }
 
       // สร้างโครงการ
+      const projectData = {
+        name: data.name,
+        budget: parseFloat(data.budget),
+        department: data.department,
+        responsible: data.responsible,
+        withdrawalAmount: 0,
+        remainingBudget: parseFloat(data.budget),
+        subsidyId: data.subsidyId,
+        fiscalYearId: data.fiscalYearId,
+      };
+
+      // เพิ่ม department_group ถ้ามี
+      if (data.department_group) {
+        projectData.department_group = data.department_group;
+      }
+
       const project = await this.prisma.project.create({
-        data: {
-          name: data.name,
-          budget: parseFloat(data.budget),
-          department: data.department,
-          responsible: data.responsible,
-          withdrawalAmount: 0,
-          remainingBudget: parseFloat(data.budget),
-          subsidyId: data.subsidyId,
-          fiscalYearId: data.fiscalYearId,
-        },
+        data: projectData,
       });
 
       // อัพเดทงบประมาณคงเหลือของเงินอุดหนุน
@@ -48,7 +55,7 @@ class ProjectService {
 
       return project;
     } catch (error) {
-      throw new Error(`ไม่สามารถอร้างโครงการได้: ${error.message}`);
+      throw new Error(`ไม่สามารถสร้างโครงการได้: ${error.message}`);
     }
   }
 
@@ -135,21 +142,25 @@ class ProjectService {
         data.remainingBudget = newBudget - currentProject.withdrawalAmount;
       }
 
+      const updateData = {
+        name: data.name,
+        budget: data.budget ? parseFloat(data.budget) : undefined,
+        department: data.department,
+        responsible: data.responsible,
+        remainingBudget: data.remainingBudget,
+        subsidyId: data.subsidyId,
+        fiscalYearId: data.fiscalYearId,
+      };
+
+      // เพิ่ม department_group ถ้ามี
+      if (data.department_group) {
+        updateData.department_group = data.department_group;
+      }
+
       // อัพเดทโครงการ
       return await this.prisma.project.update({
         where: { id: parseInt(id) },
-        data: {
-          name: data.name,
-          budget: data.budget ? parseFloat(data.budget) : undefined,
-          department: data.department,
-          responsible: data.responsible,
-          remainingBudget: data.remainingBudget,
-          subsidyId: data.subsidyId,
-          fiscalYearId: data.fiscalYearId,
-          status: data.status,
-          startDate: data.startDate,
-          endDate: data.endDate,
-        },
+        data: updateData,
         include: {
           fiscalYear: true,
           subsidy: true,
@@ -302,25 +313,25 @@ class ProjectService {
           OR: [
             {
               name: {
-                contains: searchTerm
-              }
+                contains: searchTerm,
+              },
             },
             {
               department: {
-                contains: searchTerm
-              }
+                contains: searchTerm,
+              },
             },
             {
               responsible: {
-                contains: searchTerm
-              }
-            }
-          ]
+                contains: searchTerm,
+              },
+            },
+          ],
         },
         include: {
           fiscalYear: true,
-          subsidy: true
-        }
+          subsidy: true,
+        },
       });
     } catch (error) {
       throw new Error(`ไม่สามารถค้นหาโครงการได้: ${error.message}`);

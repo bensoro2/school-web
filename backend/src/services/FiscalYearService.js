@@ -1,8 +1,8 @@
-const { PrismaClient } = require("@prisma/client");
+const prisma = require("../lib/prisma");
 
 class FiscalYearService {
   constructor() {
-    this.prisma = new PrismaClient();
+    this.prisma = prisma;
   }
 
   async createFiscalYear(data) {

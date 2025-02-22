@@ -1,9 +1,9 @@
-const { PrismaClient } = require("@prisma/client");
+const prisma = require("../lib/prisma");
 const FiscalYearService = require("./FiscalYearService");
 
 class SubsidyService {
   constructor() {
-    this.prisma = new PrismaClient();
+    this.prisma = prisma;
     this.fiscalYearService = new FiscalYearService();
   }
 

@@ -1,11 +1,11 @@
-const { PrismaClient } = require("@prisma/client");
+const prisma = require("../lib/prisma");
 const FiscalYearService = require("./FiscalYearService");
 const ProjectService = require("./ProjectService");
 const SubsidyService = require("./SubsidyService");
 
 class TransactionService {
   constructor() {
-    this.prisma = new PrismaClient();
+    this.prisma = prisma;
     this.fiscalYearService = new FiscalYearService();
     this.projectService = new ProjectService(this.prisma);
     this.subsidyService = new SubsidyService();
@@ -388,7 +388,7 @@ class TransactionService {
         },
       });
 
-      // อัพเดทปีงบประม��ณ
+      // อัพเดทปีงบประมาณ
       const allSubsidies = await this.prisma.subsidy.findMany({
         where: { fiscalYearId: project.fiscalYearId },
         include: {
